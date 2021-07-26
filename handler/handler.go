@@ -9,8 +9,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
+
 //上传文件
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
@@ -46,26 +48,27 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("Failed to start server,err:%s\n", err.Error())
 			return
 		}
-		newFile.Seek(0,0)
+		newFile.Seek(0, 0)
 		fileMeta.FileShal = util.FileSha1(newFile)
 		meta.UpdateFileMeta(fileMeta)
 
-		http.Redirect(w,r,"/file/upload/suc",http.StatusFound)
+		http.Redirect(w, r, "/file/upload/suc", http.StatusFound)
 	}
 }
 
-func UploadSucHandler(w http.ResponseWriter,r *http.Request)  {
-	io.WriteString(w,"Upload finished!")
+func UploadSucHandler(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Upload finished!")
 }
 
-func FileQueryHandler(w http.ResponseWriter,r *http.Request)  {
+//FileQueryHandler:获取文件元信息
+func FileQueryHandler(w http.ResponseWriter, r *http.Request) {
 	//解析url传递的参数，对于POST则解析响应包的主体
 	r.ParseForm()
 	//注意:如果没有调用ParseForm方法，下面无法获取表单的数据
-	filehash:=r.Form["filehash"][0]
-	fMeta :=meta.GetFileMeta(filehash)
-	data,err:=json.Marshal(fMeta)
-	if err!=nil{
+	filehash := strings.ToLower(r.Form["filehash"][0])
+	fMeta := meta.GetFileMeta(filehash)
+	data, err := json.Marshal(fMeta)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
