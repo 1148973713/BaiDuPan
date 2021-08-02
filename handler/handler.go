@@ -50,7 +50,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		newFile.Seek(0, 0)
 		fileMeta.FileShal = util.FileSha1(newFile)
-		meta.UpdateFileMeta(fileMeta)
+		//meta.UpdateFileMeta(fileMeta)
+		meta.UpdateFileMetaDB(fileMeta)
 
 		http.Redirect(w, r, "/file/upload/suc", http.StatusFound)
 	}
@@ -98,6 +99,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+//文件更新
 func FileMetaUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
@@ -119,6 +121,7 @@ func FileMetaUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	curFileMeta := meta.GetFileMeta(fileSha1)
 	curFileMeta.FileName = newFileName
 	meta.UpdateFileMeta(curFileMeta)
+	//_ =meta.UpdateFileMetaDB(curFileMeta)
 
 	w.WriteHeader(http.StatusOK)
 	data, err := json.Marshal(curFileMeta)

@@ -1,5 +1,7 @@
 package meta
 
+import "BaiDuPan/db"
+
 type FileMeta struct {
 	FileShal string
 	FileName string
@@ -27,4 +29,9 @@ func GetFileMeta(fileSha1 string) FileMeta {
 //删除文件
 func RemoveFileMeta(fileSha1 string) {
 	delete(fileMetas, fileSha1)
+}
+
+//插入数据库
+func UpdateFileMetaDB(fmeta FileMeta) bool {
+	return db.OnFileUploadFinished(fmeta.FileShal, fmeta.FileName, fmeta.FileSize, fmeta.Location)
 }
