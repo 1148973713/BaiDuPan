@@ -3,7 +3,7 @@ package meta
 import "BaiDuPan/db"
 
 type FileMeta struct {
-	FileShal string
+	FileSha1 string
 	FileName string
 	FileSize int64
 	Location string
@@ -18,7 +18,7 @@ func init() {
 
 // UpdateFileMeta : 新增/更新文件元信息
 func UpdateFileMeta(fmeta FileMeta) {
-	fileMetas[fmeta.FileShal] = fmeta
+	fileMetas[fmeta.FileSha1] = fmeta
 }
 
 // GetFileMeta : 通过sha1值获取文件的元信息对象
@@ -33,5 +33,20 @@ func RemoveFileMeta(fileSha1 string) {
 
 //插入数据库
 func UpdateFileMetaDB(fmeta FileMeta) bool {
-	return db.OnFileUploadFinished(fmeta.FileShal, fmeta.FileName, fmeta.FileSize, fmeta.Location)
+	return db.OnFileUploadFinished(fmeta.FileSha1, fmeta.FileName, fmeta.FileSize, fmeta.Location)
+}
+
+//从Mysql获取文件元信息
+func GetFileMetaDB(fileSha1 string) (FileMeta, error) {
+	tfile, err := db.GetFileMeta(fileSha1)
+	if err != nil {
+		return FileMeta{}, err
+	}
+	fmeta := FileMeta{
+		FileSha1: tfile.FileHash,
+		FileSize: tfile.FileSize.Int64,
+		FileName: tfile.FileName.String,
+		Location: tfile.FileAddr.String,
+	}
+	return fmeta, nil
 }

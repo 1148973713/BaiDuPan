@@ -49,7 +49,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		newFile.Seek(0, 0)
-		fileMeta.FileShal = util.FileSha1(newFile)
+		fileMeta.FileSha1 = util.FileSha1(newFile)
 		//meta.UpdateFileMeta(fileMeta)
 		meta.UpdateFileMetaDB(fileMeta)
 
@@ -67,7 +67,13 @@ func FileQueryHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	//注意:如果没有调用ParseForm方法，下面无法获取表单的数据
 	filehash := strings.ToLower(r.Form["filehash"][0])
-	fMeta := meta.GetFileMeta(filehash)
+	//fMeta := meta.GetFileMeta(filehash)
+	fMeta, err := meta.GetFileMetaDB(filehash)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	data, err := json.Marshal(fMeta)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -80,7 +86,7 @@ func FileQueryHandler(w http.ResponseWriter, r *http.Request) {
 func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fsha1 := r.Form.Get("filehash")
-	fm := meta.GetFileMeta(fsha1)
+	fm, _ := meta.GetFileMetaDB(fsha1)
 
 	f, err := os.Open(fm.Location)
 	if err != nil {
@@ -94,8 +100,9 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("content-disposition", "attachment;filename=\""+fm.FileName+"\"")
+	w.Header().Set("Content-Disposition", "attachment;filename=\""+fm.FileName+"\"")
 	w.Write(data)
 }
 
