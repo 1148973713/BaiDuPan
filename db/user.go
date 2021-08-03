@@ -39,5 +39,9 @@ func UserSignIn(username string, encpwd string) bool {
 		return false
 	}
 	defer stmt.Close()
-	pProws := mysql.ParseRows(row)
+	pRrows := mysql.ParseRows(row)
+	if len(pRrows) > 0 && string(pRrows[0]["user_pwd"].([]byte)) == encpwd {
+		return true
+	}
+	return false
 }
