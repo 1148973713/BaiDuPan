@@ -25,7 +25,7 @@ func UserSignup(username string, password string) bool {
 }
 
 func UserSignIn(username string, encpwd string) bool {
-	stmt, err := mysql.DBCoon().Prepare("select * from tbl_user where user_name=?limit1")
+	stmt, err := mysql.DBCoon().Prepare("select * from tbl_user where user_name=? limit 1")
 	if err != nil {
 		fmt.Printf(err.Error())
 		return false
@@ -44,4 +44,20 @@ func UserSignIn(username string, encpwd string) bool {
 		return true
 	}
 	return false
+}
+
+func UpdateToken(username string, token string) bool {
+	stmt, err := mysql.DBCoon().Prepare("replace into tbl_user_token (`user_name`,`user_token`)values(?,?)")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(username, token)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return true
 }
